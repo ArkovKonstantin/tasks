@@ -1,30 +1,33 @@
 #!/bin/bash
-mkdir $1
-cd $1
+dir=$1
+input_type=$2
+input=$3
 
-if [ $2 = 'domain' ]
-then
-var=$(echo "$3.html" | sed 's/\./_/')
-curl "https://www.whois.com/whois/$3" >> $var
+function clear_domain {
+domain=$(echo "$domain" | sed 's/https:\/\///')
+domain=$(echo "$domain" | sed 's/http:\/\///')
+domain=$(echo "$domain" | sed 's/www.//')
+}
+
+function create_html {
+file_name=$(echo "$domain.html" | sed 's/\./_/')
+curl "https://www.whois.com/whois/$domain" >> $file_name
+}
+
+if ! [ -d $dir ]; then
+mkdir $dir
 fi
 
-if [ $2 = 'file' ]
-then
-FILE=$3
-while read line; do
-     var=$(echo "$line.html" | sed 's/\./_/')
-     curl "https://www.whois.com/whois/$line" >> $var
-done < $FILE
+cd $dir
+
+if [ $input_type = 'domain' ]; then
+domain=$input
+clear_domain
+create_html
+elif [ $input_type = 'file' ]; then
+for domain in $(cat "../$input")
+do
+clear_domain
+create_html
+done
 fi
-
-#github.com
-#http://google.com
-#www.yandex.ru
-#stackoverflow.com
-
-
-#stringZ='http://google.com'
-
-# echo `expr match "$stringZ" '.*\(*[a-z]\)'`
-
-#echo `expr match "$stringZ" '\(..[a-z]*[\.]\)'`
